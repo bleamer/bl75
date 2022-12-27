@@ -8,18 +8,17 @@ from typing import Optional
 import sys
 class Solution:
     def maxPathSum(self, root: Optional[TreeNode]) -> int:
-
-        def dfsmaxsum(node, maxsum):
+        maxsum = [root.val]
+        def dfsmaxsum(node):
             if node is None:
                 return 0
             # if node.right is None and node.left is None:
             #     return node.val
-            l = dfsmaxsum(node.left, maxsum)
-            r = dfsmaxsum(node.right, maxsum)
-            nodemaxsum = l + r + node.val
-            if nodemaxsum > maxsum:
-                maxsum = nodemaxsum
-
-            return maxsum
-        maxsum = -sys.maxsize
-        return dfsmaxsum(root, maxsum)
+            l = dfsmaxsum(node.left)
+            r = dfsmaxsum(node.right)
+            l = max(l, 0)
+            r = max(r, 0)
+            maxsum[0] = max(maxsum[0], l + r + node.val)
+            return node.val + max(l, r)
+        dfsmaxsum(root)
+        return maxsum[0]
