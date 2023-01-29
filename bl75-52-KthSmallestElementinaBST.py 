@@ -1,0 +1,30 @@
+# bl75-52 Kth Smallest Element in a BST
+# lc 230
+
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+from typing import Optional
+
+class Solution:
+    def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
+
+        def inOrder(node, rank, k, foundNode=None):
+            cur_rank = rank
+            if foundNode:
+                return (cur_rank, foundNode)
+            if not node:
+                return (cur_rank, foundNode)
+            cur_rank, foundNode = inOrder(node.left, cur_rank, k, foundNode)
+            cur_rank += 1
+            if cur_rank == k:
+                foundNode = node
+            cur_rank, foundNode = inOrder(node.right, cur_rank, k, foundNode)
+            return (cur_rank, foundNode)
+
+        rank, foundNode = inOrder(root, 0, k, None)
+        return foundNode.val
