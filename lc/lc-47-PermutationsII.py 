@@ -1,0 +1,18 @@
+# 47. Permutations II solution
+
+
+class Solution:
+    def permuteUnique(self, nums: List[int]) -> List[List[int]]:
+        res = [[]]
+
+        for n in nums:
+            perm = []
+            for l in res:
+                for i in range(len(l)+1):
+                    perm.append(l[:i]+[n]+l[i:])
+                    # print(n, l, i, perm, res, l[:i], l[i:])
+                    print(l)
+                    if i < len(l) and l[i] == n: break
+            res = perm
+        return res
+        
