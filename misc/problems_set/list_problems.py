@@ -1,3 +1,7 @@
+# Python code to fetch LC problems from a CSV 
+# and tabulate them basic no. of times they have been asked at G
+# Reference: https://raw.githubusercontent.com/hxu296/leetcode-company-wise-problems-2022/main/companies/Google.csv
+
 import csv
 import requests
 from tqdm import tqdm
@@ -9,8 +13,8 @@ class Data:
     def __init__(self, col1, col2, col3):
         self.url = col1
         self.title = col2
-        self.col3 = col3
-        self._difficulty = None
+        self.n_asked = col3
+        self.difficulty = None
 
     @property
     def difficulty(self):
@@ -18,14 +22,16 @@ class Data:
     
     @difficulty.setter
     def difficulty(self, v):
-        self._difficulty = v
+        if not v.isdigit():
+            v = 'Easy'
+        self._difficulty = str(v)
 
     @difficulty.getter
     def difficulty(self):
         return self._difficulty
 
     def __str__(self) -> str:
-        return (f'url:{self.url}, col2:{self.col2}, col3:{self.col3}, difficulty:{self.difficulty}')
+        return (f'url:{self.url}, col2:{self.col2}, n_asked:{self.n_asked}, difficulty:{self.difficulty}')
     
 def get_csv_data(url):
     response = requests.get(url)
@@ -90,16 +96,18 @@ def get_problem_difficulty(data:Data):
 
 if __name__ == '__main__':
     data = get_csv_data(url)
-    for d in tqdm(data[:1]):
+    # data = data[:20]
+    for d in tqdm(data):
         d.difficulty = get_problem_difficulty(d)
+    data = [r for r in data if r.n_asked.isdigit()]
+    data = sorted(data, key=lambda x: (str(x.difficulty), int(x.n_asked)), reverse=True)
     header = '''
-        | URl | Title | col | Difficulty |
-        |-----|-------|-----|------------|
-        | URl | Title | col | Difficulty |
-        '''
+| URl | Title | Asked# | Difficulty |
+|--- |--- |--- |--- |
+'''
     rows = ''
-    for d in data[:1]:
-        rows += f"| {d.url} | {d.title} | {d.col3} | {d.difficulty} |"
+    for d in data:
+        rows += f"| {d.url} | {d.title} | {d.n_asked} | {d.difficulty} |\n"
     table = header + rows
 
     with open("misc/LC-GOOG.md", "w") as f:
