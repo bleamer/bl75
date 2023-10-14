@@ -7,31 +7,48 @@ import requests
 from tqdm import tqdm
 
 # URL of the CSV file
-url = "https://raw.githubusercontent.com/hxu296/leetcode-company-wise-problems-2022/main/companies/Google.csv"
+# url = "https://raw.githubusercontent.com/hxu296/leetcode-company-wise-problems-2022/main/companies/Google.csv"
+url = "https://raw.githubusercontent.com/snehasishroy/leetcode-companywise-interview-questions/master/google.csv"
 
 class Data:
-    def __init__(self, col1, col2, col3):
-        self.url = col1
-        self.title = col2
-        self.n_asked = col3
-        self.difficulty = None
+    LC_PROB_URL_PREFIX = "https://leetcode.com"
+    DIFF_SORT_ORDER = ["Easy","Medium", "Hard"]
+    REGEX_FREQ = ""
+    def __init__(self, col1, col2, col3, col4, col5, col6):
+        self.title = col1
+        self.url = col2
+        self.premium = col3
+        self.acceptance = col4
+        self.difficulty = col5
+        self.frequency = col6
 
-    @property
-    def difficulty(self):
-        return self._difficulty
+    # @property
+    # def difficulty(self):
+    #     return self._difficulty
     
-    @difficulty.setter
-    def difficulty(self, v):
-        if not v.isdigit():
-            v = 'Easy'
-        self._difficulty = str(v)
+    # @difficulty.setter
+    # def difficulty(self, v):
+    #     if not v.isdigit():
+    #         v = 'Easy'
+    #     self._difficulty = str(v)
 
-    @difficulty.getter
-    def difficulty(self):
-        return self._difficulty
+    # @difficulty.getter
+    # def difficulty(self):
+    #     return self._difficulty
+    @property
+    def frequency(self):
+        return self._frequency
+    
+    @frequency.setter    
+    def frequency(self, v):
+        self._frequency = float(str(v).replace("%","").replace(";",""))
+
+    @frequency.getter
+    def frequency(self):
+        return self._frequency
 
     def __str__(self) -> str:
-        return (f'url:{self.url}, col2:{self.col2}, n_asked:{self.n_asked}, difficulty:{self.difficulty}')
+        return (f'url:{self.url}, col2:{self.col2}, frequency:{self.frequency}, difficulty:{self.difficulty}')
     
 def get_csv_data(url):
     response = requests.get(url)
@@ -41,7 +58,7 @@ def get_csv_data(url):
         next(reader)
         data = []
         for row in reader:
-            data.append(Data(row[0], row[1], row[2]))
+            data.append(Data(row[1], row[2],row[3], row[4],row[5], row[6]))
         return data
     else:
         return None
@@ -97,20 +114,22 @@ def get_problem_difficulty(data:Data):
 if __name__ == '__main__':
     data = get_csv_data(url)
     # data = data[:20]
-    for d in tqdm(data):
-        d.difficulty = get_problem_difficulty(d)
-    data = [r for r in data if r.n_asked.isdigit()]
-    data = sorted(data, key=lambda x: (str(x.difficulty), int(x.n_asked)), reverse=True)
+    # for d in tqdm(data):
+    #     d.difficulty = get_problem_difficulty(d)
+    # data = [r for r in data if r.n_asked.isdigit()]
+    diff_sorting_key = lambda x: (Data.DIFF_SORT_ORDER.index(x), x) if x in Data.DIFF_SORT_ORDER else (len(Data.DIFF_SORT_ORDER), x)
+
+    data = sorted(data, key=lambda x: (diff_sorting_key(x.difficulty), float(x.frequency)), reverse=True)
     header = '''
 | URl | Title | Asked# | Difficulty |
 |--- |--- |--- |--- |
 '''
     rows = ''
     for d in data:
-        rows += f"| {d.url} | {d.title} | {d.n_asked} | {d.difficulty} |\n"
+        rows += f"| {Data.LC_PROB_URL_PREFIX}{d.url} | {d.title} | {d.frequency} | {d.difficulty} |\n"
     table = header + rows
 
-    with open("misc/LC-GOOG.md", "w") as f:
+    with open("misc/problems_set/LC-GOOG.md", "w") as f:
         f.write(table)
 
 print("Table exported as Markdown!")
