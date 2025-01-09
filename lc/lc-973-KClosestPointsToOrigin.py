@@ -11,3 +11,9 @@ class Solution:
             res.append(heapq.heappop(dist_heap)[1])
 
         return res
+    
+# # Awesome python solution
+# class Solution:
+#     def kClosest(self, points: List[List[int]], k: int) -> List[List[int]]:
+#         points.sort(key=lambda p: p[0]**2 + p[1]**2)
+#         return points[:k]
